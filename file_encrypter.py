@@ -10,63 +10,81 @@ def open_file_and_rot(file_location, encrypt_flag):
 
     with open(file_location, "r+b") as file:
 
-        try:            # if the file does not produce an error (not in use)
-            data = file.read()          # reads the file and saves it as data
-            file_write = open(file_location, "wb")          # overwrites the file and saves it as file_write
+        # if the file does not produce an error (not in use)
+        try:            
+            
+            data = file.read()          
+            file_write = open(file_location, "wb")          
 
-            rotted_string = bytes(0)            # initalizes a string for the rotted data
+            rotted_string = bytes(0)
 
-            for item in data:           # goes through each item from the read file
-                if encrypt_flag:            # if encrypt is chosen
-                    rotted_value = item + 13            # adds 13 to the decimal value
-                else:           # decryption is chosen
-                    rotted_value = item - 13            # subtracts 13 from the decimal value
+            # goes through each item from the read file
+            for item in data:           
+                if encrypt_flag:  # if encrypt is chosen
+                    rotted_value = item + 13
+                else:  # if decryption is chosen
+                    rotted_value = item - 13
 
-                if rotted_value > 255:          # if the end of the ascii table is reached
-                    rotted_value = rotted_value - 256           # start back from the beginning
+                # if the end of the ascii table is reached
+                if rotted_value > 255:  
+                    rotted_value = rotted_value - 256  # returns to beginning
                 
-                if rotted_value < 0:            # if numbers before the beginning of the ascii table are reached
-                    rotted_value = 256 + rotted_value           # move to the end
+                # if numbers are before the beginning of the ascii table 
+                if rotted_value < 0:  
+                    rotted_value = 256 + rotted_value  # moves to the end
 
-                rotted_string += rotted_value.to_bytes(1, "big")            # addes the rotated value
+                rotted_string += rotted_value.to_bytes(1, "big")
 
-            file_write.write(rotted_string)         # overwrites the file with the rotated values
+            # overwrites the file with the rotated values
+            file_write.write(rotted_string)         
 
-            file.close()            # closes the reading file
-            file_write.close()      # closes the writing file
+            file.close() 
+            file_write.close() 
 
-            if encrypt_flag:            # prints that encryption or decryption has completed
+            # prints that encryption or decryption has completed
+            if encrypt_flag:            
                 print("File Encrypted!", file_location)
             else:
                 print("File Decrypted!", file_location)
 
-        except:         # on error continue
+        except:  # on error continue
             pass
 
 def get_file(encryption_flag):
-    '''This method takes the encrypton flag as an argument and recursively gets every file in the file structure. 
-    Each file is fed into the open_file_and_rot method with the path of the file and the encryption flag. Once 
-    there are no more directories the method ends.
+    '''This method takes the encrypton flag as an argument and recursively
+    gets every file in the file structure. Each file is fed into the 
+    open_file_and_rot method with the path of the file and the encryption
+    flag. Once there are no more directories the method ends.
     '''
     
     global stack
     global current_dir
 
-    items_in_directory = os.listdir()       # gets the list of items in the directory
+    # gets the list of items in the directory
+    items_in_directory = os.listdir()      
 
     for item in items_in_directory:
-        path = current_dir + "\\" + item        # sets the path for each item in the directory
-        if os.path.isdir(path):         # checks to see if the item is a directory
-            os.chdir(path)          # if so, changes directory to the new directory found
-            current_dir = os.getcwd()           # sets the current working directory
-            stack.append(current_dir)           # adds the directory to the "stack"
-            get_file(encryption_flag)           # calls uses recursion to follow this same process
-        else:           # the items is not a directory
-            open_file_and_rot(path, encrypt_flag)          # opens the file and encrypts/decrypts
+        # sets the path for each item in the directory
+        path = current_dir + "\\" + item        
+        # checks to see if the item is a directory
+        if os.path.isdir(path): 
+            # change directory to new path 
+            os.chdir(path)  
+            # sets the new working directory
+            current_dir = os.getcwd()  
+            # adds the directory to the "stack"
+            stack.append(current_dir)  
+            # uses recursion to get more files
+            get_file(encryption_flag)  
+        else:  # the items is not a directory
+            # opens the file and encrypts/decrypts
+            open_file_and_rot(path, encrypt_flag)          
             continue
-    stack.pop()         # when there are no longer any files/folders in the path, removes the top directory
-    if len(stack) > 0:          # while the stack is not empty
-        current_dir = stack[len(stack)-1]           # changes the directory to the top item on the stack
+    # no more files/folders in the path, removes the top directory
+    stack.pop()         
+    if len(stack) > 0:  # while the stack is not empty
+        # changes the directory to the top item on the stack
+        current_dir = stack[len(stack)-1]           
 
 def set_encrypt():
     '''Sets the encryption flag to true to encrypt files.'''
@@ -81,26 +99,32 @@ def set_decrypt():
     encrypt_flag = False
 
 def on_button_click():
-    '''Checks that a location has been added and either encrypt or decrypt has been selected.
-    Sets the root directory for the encryption/decryption process.
+    '''Checks that a location has been added and either encrypt or decrypt has
+    been selected. Sets the root directory for the encryption/decryption 
+    process.
     '''
 
     global root_directory
     global encrypt_flag
 
-    root_directory = root_dir.get()         # gets the directory set by the user in the entry box
+    # gets the directory set by the user in the entry box
+    root_directory = root_dir.get()         
 
-    if root_directory != "":            # checks the user entered a value
-        if encrypt_flag == "":          # checks the user selected encryption or decryption
-            sys.exit("Select encrypt or decrypt. Exiting.")         # if encryption or decryption not set, closes the program
+    # checks the user entered a value
+    if root_directory != "":  
+         # checks the user selected encryption or decryption
+        if encrypt_flag == "": 
+            # if encryption or decryption not set, closes the program
+            sys.exit("Select encrypt or decrypt. Exiting.")         
     else:
-        sys.exit("Enter a location to start. Exiting.")         # if no location set, exits the program
+        # if no location set, exits the program
+        sys.exit("Enter a location to start. Exiting.")         
 
-    window.destroy()            # closes the window
+    window.destroy()  # closes the window
     
 
-encrypt_flag = ""           # sets encryption flag to empty
-root_directory = ""         # sets the root directory to empty
+encrypt_flag = ""  # sets encryption flag to empty
+root_directory = ""  # sets the root directory to empty
 
 # uses tkinter to create a window with an entry box, button, and radiobuttons
 window = Tk()
@@ -108,8 +132,10 @@ radio = IntVar()
 window.geometry('300x200')
 window.eval('tk::PlaceWindow . center')
 window.title('Encrypt/Decrypt Files')
-radio1 = Radiobutton(window, text='Encrypt Files', variable=radio, value=1, command=lambda: set_encrypt()).pack(anchor=W)
-radio2 = Radiobutton(window, text='Decrypt Files', variable=radio, value=2, command=lambda: set_decrypt()).pack(anchor=W)
+radio1 = Radiobutton(window, text='Encrypt Files', variable=radio, value=1, 
+    command=lambda: set_encrypt()).pack(anchor=W)
+radio2 = Radiobutton(window, text='Decrypt Files', variable=radio, value=2, 
+    command=lambda: set_decrypt()).pack(anchor=W)
 location_label = Label(window, text="Enter a location to start").pack()
 root_dir = Entry(window, width=40)
 root_dir.pack()
@@ -118,14 +144,18 @@ button.pack()
 window.mainloop()
 
 try:
-    os.chdir(root_directory)            # sets the top directory to begin the file search
+    # sets the top directory to begin the file search
+    os.chdir(root_directory)            
 
-    current_dir = os.getcwd()           # sets the current working directory
+    # sets the current working directory
+    current_dir = os.getcwd()           
 
-    stack = []          # creates an empty list (stack)
-    stack.append(current_dir)           # adds the current directory to the stack
+    stack = []
+    # adds the current directory to the stack
+    stack.append(current_dir)           
                 
-    get_file(encrypt_flag)          # starts the process of recursively getting every file from the cwd
+    # starts the process of recursively getting every file from the cwd
+    get_file(encrypt_flag)          
 
     if encrypt_flag:
         print("All files have been encrypted!")
